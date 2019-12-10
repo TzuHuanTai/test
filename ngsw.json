@@ -1,0 +1,80 @@
+{
+  "configVersion": 1,
+  "timestamp": 1575945654937,
+  "index": "https://tzyhuan.github.io/test/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "urls": [
+        "https://tzyhuan.github.io/test/favicon.ico",
+        "https://tzyhuan.github.io/test/index.html",
+        "https://tzyhuan.github.io/test/main-es2015.60d28d56407776edabb8.js",
+        "https://tzyhuan.github.io/test/main-es5.60d28d56407776edabb8.js",
+        "https://tzyhuan.github.io/test/manifest.webmanifest",
+        "https://tzyhuan.github.io/test/polyfills-es2015.2987770fde9daa1d8a2e.js",
+        "https://tzyhuan.github.io/test/polyfills-es5.6696c533341b95a3d617.js",
+        "https://tzyhuan.github.io/test/runtime-es2015.edb2fcf2778e7bf1d426.js",
+        "https://tzyhuan.github.io/test/runtime-es5.edb2fcf2778e7bf1d426.js",
+        "https://tzyhuan.github.io/test/styles.3ff695c00d717f2d2a11.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "urls": [
+        "https://tzyhuan.github.io/test/assets/icons/icon-128x128.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-144x144.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-152x152.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-192x192.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-384x384.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-512x512.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-72x72.png",
+        "https://tzyhuan.github.io/test/assets/icons/icon-96x96.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "https://tzyhuan.github.io/test/assets/icons/icon-128x128.png": "dae3b6ed49bdaf4327b92531d4b5b4a5d30c7532",
+    "https://tzyhuan.github.io/test/assets/icons/icon-144x144.png": "b0bd89982e08f9bd2b642928f5391915b74799a7",
+    "https://tzyhuan.github.io/test/assets/icons/icon-152x152.png": "7479a9477815dfd9668d60f8b3b2fba709b91310",
+    "https://tzyhuan.github.io/test/assets/icons/icon-192x192.png": "1abd80d431a237a853ce38147d8c63752f10933b",
+    "https://tzyhuan.github.io/test/assets/icons/icon-384x384.png": "329749cd6393768d3131ed6304c136b1ca05f2fd",
+    "https://tzyhuan.github.io/test/assets/icons/icon-512x512.png": "559d9c4318b45a1f2b10596bbb4c960fe521dbcc",
+    "https://tzyhuan.github.io/test/assets/icons/icon-72x72.png": "c457e56089a36952cd67156f9996bc4ce54a5ed9",
+    "https://tzyhuan.github.io/test/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
+    "https://tzyhuan.github.io/test/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
+    "https://tzyhuan.github.io/test/index.html": "2631761230b958e62c94c30cf68d208cb1ca7dde",
+    "https://tzyhuan.github.io/test/main-es2015.60d28d56407776edabb8.js": "c36f0290ec4841566189d6b6699fdfdf1b239991",
+    "https://tzyhuan.github.io/test/main-es5.60d28d56407776edabb8.js": "015d93f7d24a0a5974bd084d5c920f3be0addd06",
+    "https://tzyhuan.github.io/test/manifest.webmanifest": "38e1059c1731a17c92b688f7cf3861a618b9b49e",
+    "https://tzyhuan.github.io/test/polyfills-es2015.2987770fde9daa1d8a2e.js": "cf5cbfa9134716054fb479ab21362146cdf1f2ff",
+    "https://tzyhuan.github.io/test/polyfills-es5.6696c533341b95a3d617.js": "9ceb13edd4b10268f661814868dadb2b284f9745",
+    "https://tzyhuan.github.io/test/runtime-es2015.edb2fcf2778e7bf1d426.js": "a9aafcf49f49145093fc831efd9b8e2f6c71bb9c",
+    "https://tzyhuan.github.io/test/runtime-es5.edb2fcf2778e7bf1d426.js": "a9aafcf49f49145093fc831efd9b8e2f6c71bb9c",
+    "https://tzyhuan.github.io/test/styles.3ff695c00d717f2d2a11.css": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ]
+}
