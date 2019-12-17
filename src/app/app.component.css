@@ -1,3 +1,35 @@
+#theirsVideo {
+    position: absolute;
+    bottom: 5vh;
+    left: 10vw;
+    width: 640px;
+    height: 360px;
+    border: 1px solid red;
+}
+
+#mineVideo {
+    position: absolute;
+    bottom: 5vh;
+    left: 55vw;
+    width: 200px;
+    z-index: 9999;
+    border: 1px solid #ddd;
+}
+
+#snapCanvas {
+    position: fixed;
+    right: 10vw;
+    top: 10vh;
+    border: 1px solid yellowgreen;
+}
+
+#snapImage {
+    position: fixed;
+    right: 10vw;
+    top: 30vh;
+    border: 1px solid yellow;
+}
+
 :host {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 14px;

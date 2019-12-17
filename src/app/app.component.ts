@@ -13,11 +13,20 @@ export class AppComponent implements OnInit {
 	remoteConnection: RTCPeerConnection;
 	sendChannel: RTCDataChannel;
 	receiveChannel: RTCDataChannel;
+	canvasWidth: number = 320;
+	canvasHeight: number = 180;
+	canvasContext: CanvasRenderingContext2D;
 	@ViewChild('dataChannelSend', { static: true }) dataChannelSend: ElementRef;
 	@ViewChild('dataChannelReceive', { static: true }) dataChannelReceive: ElementRef;
 	@ViewChild('startButton', { static: true }) startButton: ElementRef;
 	@ViewChild('sendButton', { static: true }) sendButton: ElementRef;
 	@ViewChild('closeButton', { static: true }) closeButton: ElementRef;
+
+	@ViewChild('localVideo', { static: true }) localVideo: ElementRef;
+	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef;
+	@ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
+	@ViewChild('image', { static: true }) image: ElementRef<HTMLImageElement>;
+
 
 	constructor(ComponentFactoryResolver: ComponentFactoryResolver) {
 
@@ -29,6 +38,15 @@ export class AppComponent implements OnInit {
 	}
 
 	ngOnInit() {
+		this.startStream();
+
+		this.canvasContext = this.canvas.nativeElement.getContext('2d');
+
+		this.remoteVideo.nativeElement.addEventListener('loadedmetadata', () => {
+			this.canvas.nativeElement.width = this.canvasWidth;
+			this.canvas.nativeElement.height = this.canvasHeight;
+		}, false);
+
 		this.closeButton.nativeElement.disabled = true;
 		this.sendButton.nativeElement.disabled = true;
 	}
@@ -47,13 +65,13 @@ export class AppComponent implements OnInit {
 		this.localConnection = new RTCPeerConnection();
 		console.log('Created local peer connection object localConnection');
 
-		this.sendChannel = this.localConnection.createDataChannel('sendDataChannel');
+		this.sendChannel = this.localConnection.createDataChannel('sendMessageChannel');
 		console.log('Created send data channel');
 
 		this.localConnection.onicecandidate = e => {
 			this.onIceCandidate(this.localConnection, e);
 		};
-		this.sendChannel.onopen = ()=> this.onSendChannelStateChange();
+		this.sendChannel.onopen = () => this.onSendChannelStateChange();
 		this.sendChannel.onclose = () => this.onSendChannelStateChange();
 
 		this.remoteConnection = new RTCPeerConnection();
@@ -63,6 +81,8 @@ export class AppComponent implements OnInit {
 			this.onIceCandidate(this.remoteConnection, e);
 		};
 		this.remoteConnection.ondatachannel = (ev) => this.receiveChannelCallback(ev);
+
+		this.connectStream();
 
 		this.localConnection.createOffer().then(
 			desc => this.gotDescription1(desc),
@@ -76,10 +96,52 @@ export class AppComponent implements OnInit {
 		console.log('Failed to create session description: ' + error.toString());
 	}
 
-	sendData() {
+	sendMessage() {
 		const data = this.dataChannelSend.nativeElement.value;
 		this.sendChannel.send(data);
 		console.log('Sent Data: ' + data);
+	}
+
+	startStream() {
+		navigator.mediaDevices.getUserMedia({
+			audio: true,
+			video: { width: 1280, height: 720 }
+		}).then((stream: MediaStream) => {
+			this.localVideo.nativeElement.srcObject = stream;
+		}, (err) => {
+			console.log(err)
+		});
+	}
+
+	stopStream() {
+		let stream: MediaStream = this.localVideo.nativeElement.srcObject;
+
+		stream.getTracks().forEach((track: MediaStreamTrack) => {
+			track.stop();
+		});
+
+		this.localVideo.nativeElement.srcObject = null;
+	}
+
+	connectStream() {
+		let stream: MediaStream = this.localVideo.nativeElement.srcObject;
+
+		stream.getTracks().forEach((track: MediaStreamTrack) => {
+			this.localConnection.addTrack(track, stream);
+		});
+
+		this.remoteConnection.ontrack = (ev) => {
+			if (ev.streams && ev.streams[0]) {
+				this.remoteVideo.nativeElement.srcObject = ev.streams[0];
+			}
+		}
+	}
+
+	snap() {
+		this.canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+		this.canvasContext.drawImage(this.remoteVideo.nativeElement, 0, 0, this.canvasWidth, this.canvasHeight);
+		let imageURL = this.canvas.nativeElement.toDataURL('image/jpeg');
+		this.image.nativeElement.src = imageURL;
 	}
 
 	closeDataChannels() {
@@ -104,7 +166,7 @@ export class AppComponent implements OnInit {
 		console.log('=====closed Data Channels======');
 	}
 
-	gotDescription1(desc:RTCSessionDescriptionInit) {
+	gotDescription1(desc: RTCSessionDescriptionInit) {
 		this.localConnection.setLocalDescription(desc);
 		console.log(`Offer from localConnection\n${desc.sdp}`);
 		this.remoteConnection.setRemoteDescription(desc);
@@ -112,7 +174,7 @@ export class AppComponent implements OnInit {
 			desc => this.gotDescription2(desc),
 			() => this.onCreateSessionDescriptionError
 		);
-	  }
+	}
 
 	gotDescription2(desc) {
 		this.remoteConnection.setLocalDescription(desc);
@@ -128,7 +190,7 @@ export class AppComponent implements OnInit {
 		return (pc === this.localConnection) ? 'localPeerConnection' : 'remotePeerConnection';
 	}
 
-	onIceCandidate(pc, event:RTCPeerConnectionIceEvent) {
+	onIceCandidate(pc, event: RTCPeerConnectionIceEvent) {
 		this.getOtherPc(pc)
 			.addIceCandidate(event.candidate)
 			.then(
