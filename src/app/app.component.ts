@@ -13,9 +13,12 @@ export class AppComponent implements OnInit {
 	remoteConnection: RTCPeerConnection;
 	sendChannel: RTCDataChannel;
 	receiveChannel: RTCDataChannel;
-	canvasWidth: number = 320;
-	canvasHeight: number = 180;
-	canvasContext: CanvasRenderingContext2D;
+	sendImageChannel: RTCDataChannel;
+	receiveImageChannel: RTCDataChannel;
+
+	canvasWidth: number = 160;
+	canvasHeight: number = 90;
+
 	@ViewChild('dataChannelSend', { static: true }) dataChannelSend: ElementRef;
 	@ViewChild('dataChannelReceive', { static: true }) dataChannelReceive: ElementRef;
 	@ViewChild('startButton', { static: true }) startButton: ElementRef;
@@ -24,9 +27,10 @@ export class AppComponent implements OnInit {
 
 	@ViewChild('localVideo', { static: true }) localVideo: ElementRef;
 	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef;
-	@ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-	@ViewChild('image', { static: true }) image: ElementRef<HTMLImageElement>;
-
+	@ViewChild('localCanvas', { static: true }) localCanvas: ElementRef<HTMLCanvasElement>;
+	@ViewChild('localImage', { static: true }) localImage: ElementRef<HTMLImageElement>;
+	@ViewChild('remoteCanvas', { static: true }) remoteCanvas: ElementRef<HTMLCanvasElement>;
+	@ViewChild('remoteImage', { static: true }) remoteImage: ElementRef<HTMLImageElement>;
 
 	constructor(ComponentFactoryResolver: ComponentFactoryResolver) {
 
@@ -40,11 +44,9 @@ export class AppComponent implements OnInit {
 	ngOnInit() {
 		this.startStream();
 
-		this.canvasContext = this.canvas.nativeElement.getContext('2d');
-
 		this.remoteVideo.nativeElement.addEventListener('loadedmetadata', () => {
-			this.canvas.nativeElement.width = this.canvasWidth;
-			this.canvas.nativeElement.height = this.canvasHeight;
+			this.localCanvas.nativeElement.width = this.canvasWidth;
+			this.localCanvas.nativeElement.height = this.canvasHeight;
 		}, false);
 
 		this.closeButton.nativeElement.disabled = true;
@@ -60,12 +62,12 @@ export class AppComponent implements OnInit {
 	}
 
 	createConnection() {
-		console.log('=====start createConnection=====');
-		this.dataChannelSend.nativeElement.placeholder = '';
+		console.log('==========start createConnection==========');
 		this.localConnection = new RTCPeerConnection();
 		console.log('Created local peer connection object localConnection');
 
-		this.sendChannel = this.localConnection.createDataChannel('sendMessageChannel');
+		this.sendChannel = this.localConnection.createDataChannel('sendMessageChannel', { negotiated: true, id: 1 });
+		this.sendImageChannel = this.localConnection.createDataChannel('sendImageChannel', { negotiated: true, id: 2 });
 		console.log('Created send data channel');
 
 		this.localConnection.onicecandidate = e => {
@@ -80,7 +82,16 @@ export class AppComponent implements OnInit {
 		this.remoteConnection.onicecandidate = e => {
 			this.onIceCandidate(this.remoteConnection, e);
 		};
-		this.remoteConnection.ondatachannel = (ev) => this.receiveChannelCallback(ev);
+
+		//in band
+		// this.remoteConnection.ondatachannel = (ev) => this.receiveChannelCallback(ev);
+		//out of band
+		this.receiveChannel = this.remoteConnection.createDataChannel('sendMessageChannel', { negotiated: true, id: 1 });
+		this.receiveImageChannel = this.remoteConnection.createDataChannel('sendImageChannel', { negotiated: true, id: 2 });
+		this.receiveChannel.onmessage = ev => this.onReceiveMessageCallback(ev);
+		this.receiveChannel.onopen = (ev) => this.onReceiveChannelStateChange();
+		this.receiveChannel.onclose = (ev) => this.onReceiveChannelStateChange();
+		this.receiveImageChannel.onmessage = (ev) => this.onReceiveImageCallback(ev);
 
 		this.connectStream();
 
@@ -138,10 +149,17 @@ export class AppComponent implements OnInit {
 	}
 
 	snap() {
-		this.canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-		this.canvasContext.drawImage(this.remoteVideo.nativeElement, 0, 0, this.canvasWidth, this.canvasHeight);
-		let imageURL = this.canvas.nativeElement.toDataURL('image/jpeg');
-		this.image.nativeElement.src = imageURL;
+		let canvasContext = this.localCanvas.nativeElement.getContext('2d');
+		canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+		canvasContext.drawImage(this.remoteVideo.nativeElement, 0, 0, this.canvasWidth, this.canvasHeight);
+		let imageURL = this.localCanvas.nativeElement.toDataURL('image/jpeg');
+		this.localImage.nativeElement.src = imageURL;
+	}
+
+	sendImage() {
+		let imageURL = this.localCanvas.nativeElement.toDataURL();
+		this.sendImageChannel.send(imageURL);
+		console.log('Sent image:', imageURL);
 	}
 
 	closeDataChannels() {
@@ -164,6 +182,7 @@ export class AppComponent implements OnInit {
 		this.disableSendButton();
 		this.enableStartButton();
 		console.log('=====closed Data Channels======');
+		console.log(this.sendImageChannel.readyState);
 	}
 
 	gotDescription1(desc: RTCSessionDescriptionInit) {
@@ -216,9 +235,23 @@ export class AppComponent implements OnInit {
 		this.receiveChannel.onclose = (ev) => this.onReceiveChannelStateChange();
 	}
 
-	onReceiveMessageCallback(event) {
+	onReceiveMessageCallback(event: MessageEvent) {
 		console.log('Received Message');
 		this.dataChannelReceive.nativeElement.value = event.data;
+	}
+
+	onReceiveImageCallback(event: MessageEvent) {
+		console.log('Received Image');
+		this.remoteCanvas.nativeElement.width = this.canvasWidth;
+		this.remoteCanvas.nativeElement.height = this.canvasHeight;
+		let remoteCanvasContext = this.remoteCanvas.nativeElement.getContext('2d');
+		let image = new Image();
+		image.onload = () => {
+			remoteCanvasContext.drawImage(image, 0, 0);
+		};
+		image.src = event.data;
+
+		this.remoteImage.nativeElement.src = event.data;
 	}
 
 	onSendChannelStateChange() {

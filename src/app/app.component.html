@@ -20,21 +20,22 @@
     <span>Transmit text</span></h1>
 
   <div id="buttons">
-    <button #startButton (click)="createConnection()">Start</button>
-    <button #sendButton (click)="sendMessage()">Send</button>
-    <button #closeButton (click)="closeDataChannels()">Stop</button>
+    <button #startButton (click)="createConnection()">Start WebPRT</button>
+    <button #sendButton (click)="sendMessage()">Send Message</button>
+    <button #closeButton (click)="closeDataChannels()">Stop WebPRT</button>
     <br>
     <button (click)="startStream()">Start stream</button>
     <button (click)="stopStream()">Stop stream</button>
-    <button (click)="connectStream()">Remote stream</button>
+    <button (click)="connectStream()">Connect remote stream</button>
     <br>
     <button (click)="snap()">Snapshot</button>
+    <button (click)="sendImage()">Send image</button>
   </div>
 
   <div id="sendReceive">
     <div id="send">
       <h2>Send</h2>
-      <textarea #dataChannelSend disabled placeholder="Press Start, enter some text, then press Send."></textarea>
+      <textarea #dataChannelSend disabled></textarea>
     </div>
     <div id="receive">
       <h2>Receive</h2>
@@ -42,13 +43,13 @@
     </div>
   </div>
 
-  <canvas id="snapCanvas" #canvas></canvas>
-  
-  <img id="snapImage" #image>
+  <canvas id="snapCanvas" #localCanvas></canvas>
+  <img id="snapImage" #localImage>
 
-  <video id="theirsVideo" #remoteVideo autoplay></video>
-  <video id="mineVideo" #localVideo autoplay [muted]='true'></video>
+  <canvas id="remoteCanvas" #remoteCanvas></canvas>
+  <img id="remoteImage" #remoteImage>
+
+  <video id="remoteVideo" #remoteVideo autoplay></video>
+  <video id="localVideo" #localVideo autoplay [muted]='true'></video>
 
 </div>
-
-<!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->

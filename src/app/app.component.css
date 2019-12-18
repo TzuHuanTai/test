@@ -1,4 +1,4 @@
-#theirsVideo {
+#remoteVideo {
     position: absolute;
     bottom: 5vh;
     left: 10vw;
@@ -7,27 +7,49 @@
     border: 1px solid red;
 }
 
-#mineVideo {
+#localVideo {
     position: absolute;
     bottom: 5vh;
     left: 55vw;
     width: 200px;
     z-index: 9999;
-    border: 1px solid #ddd;
+    border: 1px solid green;
 }
 
 #snapCanvas {
     position: fixed;
     right: 10vw;
     top: 10vh;
-    border: 1px solid yellowgreen;
+    width: 160px;
+    height: 90px;
+    border: 1px solid green;
 }
 
 #snapImage {
     position: fixed;
     right: 10vw;
     top: 30vh;
-    border: 1px solid yellow;
+    width: 160px;
+    height: 90px;
+    border: 1px solid green;
+}
+
+#remoteCanvas {
+    position: fixed;
+    right: 30vw;
+    top: 10vh;
+    width: 160px;
+    height: 90px;
+    border: 1px solid red;
+}
+
+#remoteImage {
+    position: fixed;
+    right: 30vw;
+    top: 30vh;
+    width: 160px;
+    height: 90px;
+    border: 1px solid red;
 }
 
 :host {
