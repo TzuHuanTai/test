@@ -17,19 +17,18 @@
 <div id="container">
 
   <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a>
-    <span>Transmit text</span></h1>
+  </h1>
 
   <div id="buttons">
-    <button #startButton (click)="createConnection()">Start WebPRT</button>
-    <button #sendButton (click)="sendMessage()">Send Message</button>
-    <button #closeButton (click)="closeDataChannels()">Stop WebPRT</button>
+    <button #startButton (click)="createConnection()" [disabled]="isConntected">Start WebPRT</button>
+    <button #sendButton (click)="sendMessage()" [disabled]="!isConntected">Send Message</button>
+    <button #closeButton (click)="closeDataChannels()" [disabled]="!isConntected">Stop WebPRT</button>
     <br>
     <button (click)="startStream()">Start stream</button>
     <button (click)="stopStream()">Stop stream</button>
-    <button (click)="connectStream()">Connect remote stream</button>
     <br>
-    <button (click)="snap()">Snapshot</button>
-    <button (click)="sendImage()">Send image</button>
+    <button (click)="snap()" [disabled]="!isConntected">Snapshot</button>
+    <button (click)="sendImage()" [disabled]="!isConntected">Send image</button>
   </div>
 
   <div id="sendReceive">
@@ -41,15 +40,36 @@
       <h2>Receive</h2>
       <textarea #dataChannelReceive disabled></textarea>
     </div>
+
+    <div id="snapshotCanvas">
+      <canvas id="snapCanvas" #localCanvas>remote</canvas>
+      <canvas id="remoteCanvas" #remoteCanvas></canvas>
+    </div>
   </div>
 
-  <canvas id="snapCanvas" #localCanvas></canvas>
-  <img id="snapImage" #localImage>
+  <div id="drawPanel">
+    <canvas id="drawingCanvas" #drawingCanvas></canvas>
 
-  <canvas id="remoteCanvas" #remoteCanvas></canvas>
-  <img id="remoteImage" #remoteImage>
+    <div id="color-selector">
+      <span class="black" (click)="changeColor($event.target)"></span>
+      <span class="red" (click)="changeColor($event.target)"></span>
+      <span class="orange" (click)="changeColor($event.target)"></span>
+      <span class="cyan" (click)="changeColor($event.target)"></span>
+      <span class="blue" (click)="changeColor($event.target)"></span>
+      <span class="green" (click)="changeColor($event.target)"></span>
+      <span class="magenta" (click)="changeColor($event.target)"></span>
+      <span class="white" (click)="changeColor($event.target)"></span>
+    </div>
 
-  <video id="remoteVideo" #remoteVideo autoplay></video>
-  <video id="localVideo" #localVideo autoplay [muted]='true'></video>
+    <button #backButton (click)='undo()'>←</button>
+    <button #nextButton (click)='redo()'>→</button>
+    <button #clearButton (click)='clear()'>clean</button>
+    <button #clearButton (click)='sendDrawnCanvas()' [disabled]="!isConntected">send</button>
+  </div>
+
+  <div id="sendVideo">
+    <video id="remoteVideo" #remoteVideo autoplay></video>
+    <video id="localVideo" #localVideo autoplay [muted]='true'></video>
+  </div>
 
 </div>

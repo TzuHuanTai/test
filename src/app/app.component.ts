@@ -6,8 +6,9 @@ import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef } fr
 	styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-	title = 'ng9new';
 	resolver = [];
+
+	isConntected: boolean = false;
 
 	localConnection: RTCPeerConnection;
 	remoteConnection: RTCPeerConnection;
@@ -18,6 +19,11 @@ export class AppComponent implements OnInit {
 
 	canvasWidth: number = 160;
 	canvasHeight: number = 90;
+	receiveImage: HTMLImageElement = new Image();
+	strokeStyle: string = '#000';
+	lineWidth: number = 2;
+	undoDrawingHistory = [];
+	redoDrawingHistory = [];
 
 	@ViewChild('dataChannelSend', { static: true }) dataChannelSend: ElementRef;
 	@ViewChild('dataChannelReceive', { static: true }) dataChannelReceive: ElementRef;
@@ -28,15 +34,14 @@ export class AppComponent implements OnInit {
 	@ViewChild('localVideo', { static: true }) localVideo: ElementRef;
 	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef;
 	@ViewChild('localCanvas', { static: true }) localCanvas: ElementRef<HTMLCanvasElement>;
-	@ViewChild('localImage', { static: true }) localImage: ElementRef<HTMLImageElement>;
 	@ViewChild('remoteCanvas', { static: true }) remoteCanvas: ElementRef<HTMLCanvasElement>;
-	@ViewChild('remoteImage', { static: true }) remoteImage: ElementRef<HTMLImageElement>;
+	@ViewChild('drawingCanvas', { static: true }) drawingCanvas: ElementRef<HTMLCanvasElement>;
 
 	constructor(ComponentFactoryResolver: ComponentFactoryResolver) {
 
-		console.log('AppComponent');
+		// Angular 8 is work, but 9.0 can't
 		ComponentFactoryResolver['_factories'].forEach((element) => {
-			console.log(element)
+			console.log(element);
 		});
 		this.resolver = Array.from(ComponentFactoryResolver['_factories'].values());
 	}
@@ -44,21 +49,68 @@ export class AppComponent implements OnInit {
 	ngOnInit() {
 		this.startStream();
 
+		this.initDrawPanel();
+
 		this.remoteVideo.nativeElement.addEventListener('loadedmetadata', () => {
 			this.localCanvas.nativeElement.width = this.canvasWidth;
 			this.localCanvas.nativeElement.height = this.canvasHeight;
 		}, false);
 
+		// other
 		this.closeButton.nativeElement.disabled = true;
 		this.sendButton.nativeElement.disabled = true;
 	}
 
-	enableStartButton() {
-		this.startButton.nativeElement.disabled = false;
+	initDrawPanel() {
+		/**
+		 * putImageData以 drawImage更新畫面有效能問題！
+		 * Issue: https://stackoverflow.com/questions/3952856/why-is-putimagedata-so-slow
+		 */
+		let isDrawing: boolean;
+		let prevX: number, prevY: number, currX: number, currY: number;
+		let canvas: HTMLCanvasElement = this.drawingCanvas.nativeElement;
+		let context: CanvasRenderingContext2D = canvas.getContext('2d');
+		canvas.width = this.canvasWidth;
+		canvas.height = this.canvasHeight;
+
+		canvas.onmousedown = (e) => {
+			let buffer = this.getBufferCanvas(canvas)
+			this.undoDrawingHistory.push(buffer);
+			isDrawing = true;
+			prevX = currX;
+			prevY = currY;
+			currX = e.clientX - canvas.offsetLeft + window.scrollX;
+			currY = e.clientY - canvas.offsetTop + window.scrollY;
+		};
+
+		canvas.onmousemove = (e) => {
+			if (isDrawing) {
+				prevX = currX;
+				prevY = currY;
+				currX = e.clientX - canvas.offsetLeft + window.scrollX;
+				currY = e.clientY - canvas.offsetTop + window.scrollY;
+				context.beginPath();
+				context.moveTo(prevX, prevY);
+				context.lineTo(currX, currY);
+				context.strokeStyle = this.strokeStyle;
+				context.lineWidth = this.lineWidth;
+				context.stroke();
+			}
+		};
+
+		canvas.onmouseup = () => {
+			isDrawing = false;
+			this.redoDrawingHistory = [this.getBufferCanvas(canvas)];
+		};
+
 	}
 
-	disableSendButton() {
-		this.sendButton.nativeElement.disabled = true;
+	getBufferCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
+		let buffer = document.createElement('canvas');
+		buffer.width = canvas.width;
+		buffer.height = canvas.height;
+		buffer.getContext('2d').drawImage(canvas, 0, 0);
+		return buffer;
 	}
 
 	createConnection() {
@@ -83,24 +135,22 @@ export class AppComponent implements OnInit {
 			this.onIceCandidate(this.remoteConnection, e);
 		};
 
-		//in band
-		// this.remoteConnection.ondatachannel = (ev) => this.receiveChannelCallback(ev);
-		//out of band
 		this.receiveChannel = this.remoteConnection.createDataChannel('sendMessageChannel', { negotiated: true, id: 1 });
 		this.receiveImageChannel = this.remoteConnection.createDataChannel('sendImageChannel', { negotiated: true, id: 2 });
 		this.receiveChannel.onmessage = ev => this.onReceiveMessageCallback(ev);
-		this.receiveChannel.onopen = (ev) => this.onReceiveChannelStateChange();
-		this.receiveChannel.onclose = (ev) => this.onReceiveChannelStateChange();
+		this.receiveChannel.onopen = () => this.onReceiveChannelStateChange();
+		this.receiveChannel.onclose = () => this.onReceiveChannelStateChange();
 		this.receiveImageChannel.onmessage = (ev) => this.onReceiveImageCallback(ev);
 
-		this.connectStream();
+		if (this.localVideo.nativeElement.srcObject) {
+			this.connectStream();
+		}
 
 		this.localConnection.createOffer().then(
 			desc => this.gotDescription1(desc),
 			() => this.onCreateSessionDescriptionError
 		);
-		this.startButton.nativeElement.disabled = true;
-		this.closeButton.nativeElement.disabled = false;
+		this.isConntected = true;
 	}
 
 	onCreateSessionDescriptionError(error) {
@@ -152,14 +202,12 @@ export class AppComponent implements OnInit {
 		let canvasContext = this.localCanvas.nativeElement.getContext('2d');
 		canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 		canvasContext.drawImage(this.remoteVideo.nativeElement, 0, 0, this.canvasWidth, this.canvasHeight);
-		let imageURL = this.localCanvas.nativeElement.toDataURL('image/jpeg');
-		this.localImage.nativeElement.src = imageURL;
+
 	}
 
 	sendImage() {
 		let imageURL = this.localCanvas.nativeElement.toDataURL();
 		this.sendImageChannel.send(imageURL);
-		console.log('Sent image:', imageURL);
 	}
 
 	closeDataChannels() {
@@ -179,10 +227,8 @@ export class AppComponent implements OnInit {
 		this.dataChannelSend.nativeElement.value = '';
 		this.dataChannelReceive.nativeElement.value = '';
 		this.dataChannelSend.nativeElement.disabled = true;
-		this.disableSendButton();
-		this.enableStartButton();
+		this.isConntected = false;
 		console.log('=====closed Data Channels======');
-		console.log(this.sendImageChannel.readyState);
 	}
 
 	gotDescription1(desc: RTCSessionDescriptionInit) {
@@ -227,14 +273,6 @@ export class AppComponent implements OnInit {
 		console.log(`Failed to add Ice Candidate: ${error.toString()}`);
 	}
 
-	receiveChannelCallback(event) {
-		console.log('Receive Channel Callback');
-		this.receiveChannel = event.channel;
-		this.receiveChannel.onmessage = ev => this.onReceiveMessageCallback(ev);
-		this.receiveChannel.onopen = (ev) => this.onReceiveChannelStateChange();
-		this.receiveChannel.onclose = (ev) => this.onReceiveChannelStateChange();
-	}
-
 	onReceiveMessageCallback(event: MessageEvent) {
 		console.log('Received Message');
 		this.dataChannelReceive.nativeElement.value = event.data;
@@ -245,13 +283,12 @@ export class AppComponent implements OnInit {
 		this.remoteCanvas.nativeElement.width = this.canvasWidth;
 		this.remoteCanvas.nativeElement.height = this.canvasHeight;
 		let remoteCanvasContext = this.remoteCanvas.nativeElement.getContext('2d');
-		let image = new Image();
-		image.onload = () => {
-			remoteCanvasContext.drawImage(image, 0, 0);
-		};
-		image.src = event.data;
 
-		this.remoteImage.nativeElement.src = event.data;
+		this.receiveImage.onload = (ev) => {
+			remoteCanvasContext.drawImage(this.receiveImage, 0, 0);
+			this.drawDrawingCanvas(this.receiveImage);
+		}
+		this.receiveImage.src = event.data;
 	}
 
 	onSendChannelStateChange() {
@@ -272,5 +309,73 @@ export class AppComponent implements OnInit {
 	onReceiveChannelStateChange() {
 		const readyState = this.receiveChannel.readyState;
 		console.log(`Receive channel state is: ${readyState}`);
+	}
+
+	changeColor(obj: HTMLElement) {
+		switch (obj.className) {
+			case "green":
+				this.strokeStyle = "green";
+				break;
+			case "blue":
+				this.strokeStyle = "blue";
+				break;
+			case "red":
+				this.strokeStyle = "red";
+				break;
+			case "yellow":
+				this.strokeStyle = "yellow";
+				break;
+			case "orange":
+				this.strokeStyle = "orange";
+				break;
+			case "black":
+				this.strokeStyle = "black";
+				break;
+			case "white":
+				this.strokeStyle = "white";
+				break;
+			case "cyan":
+				this.strokeStyle = "cyan";
+				break;
+			case "magenta":
+				this.strokeStyle = "magenta";
+				break;
+		}
+		if (this.strokeStyle == "white") this.lineWidth = 14;
+		else this.lineWidth = 2;
+	}
+
+	undo() {
+		if (this.undoDrawingHistory.length > 0) {
+			let imageURL = this.undoDrawingHistory.pop();
+			this.redoDrawingHistory.push(imageURL);
+			this.drawDrawingCanvas(imageURL);
+		}
+	}
+
+	redo() {
+		if (this.redoDrawingHistory.length > 1) {
+			let imageURL = this.redoDrawingHistory.pop();
+			this.undoDrawingHistory.push(imageURL);
+			this.drawDrawingCanvas(this.redoDrawingHistory[this.redoDrawingHistory.length - 1]);
+		}
+	}
+
+	sendDrawnCanvas() {
+		let imageURL = this.drawingCanvas.nativeElement.toDataURL();
+		this.sendImageChannel.send(imageURL);
+	}
+
+	clear() {
+		this.redoDrawingHistory = [];
+		this.undoDrawingHistory = [];
+		this.drawDrawingCanvas(this.receiveImage);
+	}
+
+	drawDrawingCanvas(imgData: CanvasImageSource) {
+		let canvas = this.drawingCanvas.nativeElement;
+		let context = this.drawingCanvas.nativeElement.getContext('2d');
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.drawImage(imgData, 0, 0);
 	}
 }
