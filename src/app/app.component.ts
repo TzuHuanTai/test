@@ -82,6 +82,15 @@ export class AppComponent implements OnInit {
 			currX = e.clientX - canvas.offsetLeft + window.scrollX;
 			currY = e.clientY - canvas.offsetTop + window.scrollY;
 		};
+		canvas.ontouchstart = (e) => {
+			let buffer = this.getBufferCanvas(canvas)
+			this.undoDrawingHistory.push(buffer);
+			isDrawing = true;
+			prevX = currX;
+			prevY = currY;
+			currX = e.touches[0].clientX - canvas.offsetLeft + window.scrollX;
+			currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY;
+		}
 
 		canvas.onmousemove = (e) => {
 			if (isDrawing) {
@@ -97,12 +106,29 @@ export class AppComponent implements OnInit {
 				context.stroke();
 			}
 		};
+		canvas.ontouchmove = (e) => {
+			if (isDrawing) {
+				prevX = currX;
+				prevY = currY;
+				currX = e.touches[0].clientX - canvas.offsetLeft + window.scrollX;
+				currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY;
+				context.beginPath();
+				context.moveTo(prevX, prevY);
+				context.lineTo(currX, currY);
+				context.strokeStyle = this.strokeStyle;
+				context.lineWidth = this.lineWidth;
+				context.stroke();
+			}
+		}
 
 		canvas.onmouseup = () => {
 			isDrawing = false;
 			this.redoDrawingHistory = [this.getBufferCanvas(canvas)];
 		};
-
+		canvas.ontouchend = () => {
+			isDrawing = false;
+			this.redoDrawingHistory = [this.getBufferCanvas(canvas)];
+		}
 	}
 
 	getBufferCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
