@@ -29,6 +29,9 @@
     <br>
     <button (click)="snap()" [disabled]="!isConntected">Snapshot</button>
     <button (click)="sendImage()" [disabled]="!isConntected">Send image</button>
+    <br>
+    <button (click)="openFullscreen()">Open Fullscreen</button>
+    <button (click)="closeFullscreen()">Close Fullscreen</button>
   </div>
 
   <div id="sendReceive">

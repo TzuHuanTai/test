@@ -1,4 +1,5 @@
-import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef } from '@angular/core';
+import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
 	selector: 'app-root',
@@ -37,7 +38,8 @@ export class AppComponent implements OnInit {
 	@ViewChild('remoteCanvas', { static: true }) remoteCanvas: ElementRef<HTMLCanvasElement>;
 	@ViewChild('drawingCanvas', { static: true }) drawingCanvas: ElementRef<HTMLCanvasElement>;
 
-	constructor(ComponentFactoryResolver: ComponentFactoryResolver) {
+	constructor(ComponentFactoryResolver: ComponentFactoryResolver,
+		@Inject(DOCUMENT) private document: any) {
 
 		// Angular 8 is work, but 9.0 can't
 		ComponentFactoryResolver['_factories'].forEach((element) => {
@@ -405,5 +407,31 @@ export class AppComponent implements OnInit {
 		let context = this.drawingCanvas.nativeElement.getContext('2d');
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		context.drawImage(imgData, 0, 0, canvas.width, canvas.height);
+	}
+
+	openFullscreen() {
+		let elem = this.document.documentElement;
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		} else if (elem.mozRequestFullScreen) { /* Firefox */
+			elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+			elem.webkitRequestFullscreen();
+		} else if (elem.msRequestFullscreen) { /* IE/Edge */
+			elem.msRequestFullscreen();
+		}
+	}
+
+	closeFullscreen() {
+		let document = this.document;
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		} else if (document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+		} else if (document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		} else if (document.msExitFullscreen) {
+			document.msExitFullscreen();
+		}
 	}
 }
