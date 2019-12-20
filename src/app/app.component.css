@@ -31,8 +31,8 @@
 
 #remoteVideo {
     position: absolute;
-    width: 96vw;
-    height: 54vw;
+    width: 100%;
+    height: 100%;
 }
 
 #localVideo {
