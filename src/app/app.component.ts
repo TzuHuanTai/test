@@ -32,11 +32,13 @@ export class AppComponent implements OnInit {
 	@ViewChild('sendButton', { static: true }) sendButton: ElementRef;
 	@ViewChild('closeButton', { static: true }) closeButton: ElementRef;
 
-	@ViewChild('localVideo', { static: true }) localVideo: ElementRef;
-	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef;
 	@ViewChild('localCanvas', { static: true }) localCanvas: ElementRef<HTMLCanvasElement>;
 	@ViewChild('remoteCanvas', { static: true }) remoteCanvas: ElementRef<HTMLCanvasElement>;
 	@ViewChild('drawingCanvas', { static: true }) drawingCanvas: ElementRef<HTMLCanvasElement>;
+
+	@ViewChild('videoPanel', { static: true }) videoPanel: ElementRef<HTMLDivElement>;
+	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef<HTMLVideoElement>;
+	@ViewChild('localVideo', { static: true }) localVideo: ElementRef<HTMLVideoElement>;
 
 	constructor(ComponentFactoryResolver: ComponentFactoryResolver,
 		@Inject(DOCUMENT) private document: any) {
@@ -206,7 +208,7 @@ export class AppComponent implements OnInit {
 	}
 
 	stopStream() {
-		let stream: MediaStream = this.localVideo.nativeElement.srcObject;
+		let stream: MediaStream = <MediaStream>this.localVideo.nativeElement.srcObject;
 
 		stream.getTracks().forEach((track: MediaStreamTrack) => {
 			track.stop();
@@ -216,7 +218,7 @@ export class AppComponent implements OnInit {
 	}
 
 	connectStream() {
-		let stream: MediaStream = this.localVideo.nativeElement.srcObject;
+		let stream: MediaStream = <MediaStream>this.localVideo.nativeElement.srcObject;
 
 		stream.getTracks().forEach((track: MediaStreamTrack) => {
 			this.localConnection.addTrack(track, stream);
@@ -422,6 +424,13 @@ export class AppComponent implements OnInit {
 		}
 	}
 
+	videoFullscreen() {
+		let elem = this.videoPanel.nativeElement;
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		}
+	}
+	
 	closeFullscreen() {
 		let document = this.document;
 		if (document.exitFullscreen) {

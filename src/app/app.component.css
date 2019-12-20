@@ -1,9 +1,33 @@
-#sendVideo{
+#videoPanel{
     position: absolute;
     width: 96vw;
     height: 54vw;
     border: 1px solid red;
 } 
+
+#videoPanel button{
+    border: 1px solid green;
+    z-index: 99999;
+} 
+.subVideoPanel{
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 8vw 8vw;
+}
+
+.button-item {
+    padding: 1vw;
+    text-align: center;
+}
+
+.video-item {
+    grid-row: 2;
+    grid-column-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: 0 auto;
+    border: 1px solid green;
+}
 
 #remoteVideo {
     position: absolute;
@@ -12,7 +36,6 @@
 }
 
 #localVideo {
-    position: absolute; 
     width: 16vw;
     height: 9vw;
     z-index: 9999;

@@ -74,9 +74,13 @@
     </div>
   </div>
 
-  <div id="sendVideo">
+  <div id="videoPanel" #videoPanel>
     <video id="remoteVideo" #remoteVideo autoplay></video>
-    <video id="localVideo" #localVideo autoplay [muted]='true'></video>
+    <div class='subVideoPanel'>
+      <button class="button-item" (click)="videoFullscreen()">Video Panel Fullscreen</button>
+      <button class="button-item" (click)="closeFullscreen()">Close Fullscreen</button>
+      <video class="video-item" id="localVideo" #localVideo autoplay [muted]='true'></video>
+    </div>
   </div>
 
 </div>
