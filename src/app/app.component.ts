@@ -231,7 +231,7 @@ export class AppComponent implements OnInit {
 		let canvasContext = this.localCanvas.nativeElement.getContext('2d');
 		canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 		canvasContext.drawImage(this.remoteVideo.nativeElement, 0, 0, this.canvasWidth, this.canvasHeight);
-
+		this.drawDrawingCanvas(this.remoteVideo.nativeElement);
 	}
 
 	sendImage() {
@@ -315,7 +315,6 @@ export class AppComponent implements OnInit {
 
 		this.receiveImage.onload = (ev) => {
 			remoteCanvasContext.drawImage(this.receiveImage, 0, 0);
-			this.drawDrawingCanvas(this.receiveImage);
 		}
 		this.receiveImage.src = event.data;
 	}
@@ -405,6 +404,6 @@ export class AppComponent implements OnInit {
 		let canvas = this.drawingCanvas.nativeElement;
 		let context = this.drawingCanvas.nativeElement.getContext('2d');
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		context.drawImage(imgData, 0, 0);
+		context.drawImage(imgData, 0, 0, canvas.width, canvas.height);
 	}
 }
