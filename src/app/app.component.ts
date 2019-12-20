@@ -399,7 +399,7 @@ export class AppComponent implements OnInit {
 	clear() {
 		this.redoDrawingHistory = [];
 		this.undoDrawingHistory = [];
-		this.drawDrawingCanvas(this.receiveImage);
+		this.drawDrawingCanvas(this.localCanvas.nativeElement);
 	}
 
 	drawDrawingCanvas(imgData: CanvasImageSource) {
