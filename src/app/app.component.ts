@@ -17,10 +17,10 @@ export class AppComponent implements OnInit {
 	sendImageChannel: RTCDataChannel;
 	receiveImageChannel: RTCDataChannel;
 
-	canvasWidth: number = 160;
-	canvasHeight: number = 90;
+	canvasWidth: number = 320;
+	canvasHeight: number = 180;
 	receiveImage: HTMLImageElement = new Image();
-	strokeStyle: string = '#000';
+	strokeStyle: string = 'green';
 	lineWidth: number = 2;
 	undoDrawingHistory = [];
 	redoDrawingHistory = [];
@@ -79,25 +79,26 @@ export class AppComponent implements OnInit {
 			isDrawing = true;
 			prevX = currX;
 			prevY = currY;
-			currX = e.clientX - canvas.offsetLeft + window.scrollX;
-			currY = e.clientY - canvas.offsetTop + window.scrollY;
+			currX = e.offsetX;
+			currY = e.offsetY;
 		};
 		canvas.ontouchstart = (e) => {
+			e.preventDefault();
 			let buffer = this.getBufferCanvas(canvas)
 			this.undoDrawingHistory.push(buffer);
 			isDrawing = true;
 			prevX = currX;
 			prevY = currY;
 			currX = e.touches[0].clientX - canvas.offsetLeft + window.scrollX;
-			currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY;
+			currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY - canvas.offsetHeight;
 		}
 
 		canvas.onmousemove = (e) => {
 			if (isDrawing) {
 				prevX = currX;
 				prevY = currY;
-				currX = e.clientX - canvas.offsetLeft + window.scrollX;
-				currY = e.clientY - canvas.offsetTop + window.scrollY;
+				currX = e.offsetX;
+				currY = e.offsetY;
 				context.beginPath();
 				context.moveTo(prevX, prevY);
 				context.lineTo(currX, currY);
@@ -107,11 +108,12 @@ export class AppComponent implements OnInit {
 			}
 		};
 		canvas.ontouchmove = (e) => {
+			e.preventDefault();
 			if (isDrawing) {
 				prevX = currX;
 				prevY = currY;
 				currX = e.touches[0].clientX - canvas.offsetLeft + window.scrollX;
-				currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY;
+				currY = e.touches[0].clientY - canvas.offsetTop + window.scrollY - canvas.offsetHeight;
 				context.beginPath();
 				context.moveTo(prevX, prevY);
 				context.lineTo(currX, currY);
@@ -125,7 +127,8 @@ export class AppComponent implements OnInit {
 			isDrawing = false;
 			this.redoDrawingHistory = [this.getBufferCanvas(canvas)];
 		};
-		canvas.ontouchend = () => {
+		canvas.ontouchend = (e) => {
+			e.preventDefault();
 			isDrawing = false;
 			this.redoDrawingHistory = [this.getBufferCanvas(canvas)];
 		}

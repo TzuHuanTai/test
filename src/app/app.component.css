@@ -1,5 +1,5 @@
 #sendVideo{
-    position: relative;
+    position: absolute;
     width: 96vw;
     height: 54vw;
     border: 1px solid red;
@@ -20,25 +20,15 @@
 }
 
 #snapCanvas {
-    position: absolute;
-    right: 10vw;
-    top: 5vh;
-    width: 16vw;
-    height: 9vw;
+    width: 32vw;
+    height: 18vw;
     border: 1px solid green;
 }
 
 #remoteCanvas {
-    position: absolute;
-    right: 30vw;
-    top: 5vh;
-    width: 16vw;
-    height: 9vw;
+    width: 32vw;
+    height: 18vw;
     border: 1px solid red;
-}
-
-#drawPanel {
-    border: 1px solid green;
 }
 
 #drawingCanvas{
@@ -94,7 +84,22 @@
 
 #sendReceive{
     position: relative;
-    width: 96vw;
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    padding: 1vw;
+    width: 90vw;
+}
+
+.grid-item {
+    padding: 1vw;
+    text-align: center;
+}
+
+.drawPanel {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: 0 auto;
+    border: 1px solid green;
 }
 
 :host {

@@ -32,39 +32,43 @@
   </div>
 
   <div id="sendReceive">
-    <div id="send">
+    <div class="grid-item">
       <h2>Send</h2>
       <textarea #dataChannelSend disabled></textarea>
     </div>
-    <div id="receive">
+    <div class="grid-item">
       <h2>Receive</h2>
       <textarea #dataChannelReceive disabled></textarea>
     </div>
 
-    <div id="snapshotCanvas">
-      <canvas id="snapCanvas" #localCanvas>remote</canvas>
+    <div class="grid-item">
+      <h2>Local</h2>
+      <canvas id="snapCanvas" #localCanvas></canvas>
+    </div>
+    <div class="grid-item">
+      <h2>Romote</h2>
       <canvas id="remoteCanvas" #remoteCanvas></canvas>
     </div>
-  </div>
 
-  <div id="drawPanel">
-    <canvas id="drawingCanvas" #drawingCanvas></canvas>
+    <div class="drawPanel">
+      <canvas id="drawingCanvas" #drawingCanvas></canvas>
 
-    <div id="color-selector">
-      <span class="black" (click)="changeColor($event.target)"></span>
-      <span class="red" (click)="changeColor($event.target)"></span>
-      <span class="orange" (click)="changeColor($event.target)"></span>
-      <span class="cyan" (click)="changeColor($event.target)"></span>
-      <span class="blue" (click)="changeColor($event.target)"></span>
-      <span class="green" (click)="changeColor($event.target)"></span>
-      <span class="magenta" (click)="changeColor($event.target)"></span>
-      <span class="white" (click)="changeColor($event.target)"></span>
+      <div id="color-selector">
+        <span class="black" (click)="changeColor($event.target)"></span>
+        <span class="red" (click)="changeColor($event.target)"></span>
+        <span class="orange" (click)="changeColor($event.target)"></span>
+        <span class="cyan" (click)="changeColor($event.target)"></span>
+        <span class="blue" (click)="changeColor($event.target)"></span>
+        <span class="green" (click)="changeColor($event.target)"></span>
+        <span class="magenta" (click)="changeColor($event.target)"></span>
+        <span class="white" (click)="changeColor($event.target)"></span>
+      </div>
+
+      <button #backButton (click)='undo()'>←</button>
+      <button #nextButton (click)='redo()'>→</button>
+      <button #clearButton (click)='clear()'>clean</button>
+      <button #clearButton (click)='sendDrawnCanvas()' [disabled]="!isConntected">send</button>
     </div>
-
-    <button #backButton (click)='undo()'>←</button>
-    <button #nextButton (click)='redo()'>→</button>
-    <button #clearButton (click)='clear()'>clean</button>
-    <button #clearButton (click)='sendDrawnCanvas()' [disabled]="!isConntected">send</button>
   </div>
 
   <div id="sendVideo">
