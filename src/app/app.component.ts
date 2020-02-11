@@ -1,14 +1,20 @@
-import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef, Inject } from '@angular/core';
+import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef, Inject, OnDestroy } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import * as signalR from '@microsoft/signalr';
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
 	resolver = [];
 
+	private connection = new signalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5000/SignalingServer")
+    .configureLogging(signalR.LogLevel.Information)
+	.build();
+	
 	isConntected: boolean = false;
 
 	localConnection: RTCPeerConnection;
@@ -48,9 +54,17 @@ export class AppComponent implements OnInit {
 			console.log(element);
 		});
 		this.resolver = Array.from(ComponentFactoryResolver['_factories'].values());
+
+		// 初始化建立SignalR連線   
+		this.connection.start().catch(err => console.error(err));
 	}
 
 	ngOnInit() {
+		//SignalR開始連線接收刷新數據
+		this.connection.on("AnswerSDP", (receiveSdp,b) => {
+			console.log(receiveSdp,b);
+		});
+
 		this.startStream();
 
 		this.initDrawPanel();
@@ -63,6 +77,11 @@ export class AppComponent implements OnInit {
 		// other
 		this.closeButton.nativeElement.disabled = true;
 		this.sendButton.nativeElement.disabled = true;
+	}
+
+	ngOnDestroy(){
+		//關閉SignalR連線
+		this.connection.off;
 	}
 
 	initDrawPanel() {
