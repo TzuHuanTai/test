@@ -50,6 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
 		@Inject(DOCUMENT) private document: any) {
 
 		// Angular 8 is work, but 9.0 can't
+		console.log(ComponentFactoryResolver);
 		ComponentFactoryResolver['_factories'].forEach((element) => {
 			console.log(element);
 		});
