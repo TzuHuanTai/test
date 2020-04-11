@@ -1,19 +1,20 @@
-import { Component, ViewChild, OnInit, ComponentFactoryResolver, ElementRef, Inject, OnDestroy } from '@angular/core';
+import { Component, ViewChild, OnInit, ComponentFactoryResolver, ɵCodegenComponentFactoryResolver, ElementRef, Inject, OnDestroy } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import * as signalR from '@microsoft/signalr';
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.css']
+	styleUrls: ['./app.component.css'],
+	providers:[]
 })
 export class AppComponent implements OnInit, OnDestroy {
 	resolver = [];
 
-	private connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5000/SignalingServer")
-    .configureLogging(signalR.LogLevel.Information)
-	.build();
+	// private connection = new signalR.HubConnectionBuilder()
+    // .withUrl("http://localhost:5000/SignalingServer")
+    // .configureLogging(signalR.LogLevel.Information)
+	// .build();
 	
 	isConntected: boolean = false;
 
@@ -46,25 +47,30 @@ export class AppComponent implements OnInit, OnDestroy {
 	@ViewChild('remoteVideo', { static: true }) remoteVideo: ElementRef<HTMLVideoElement>;
 	@ViewChild('localVideo', { static: true }) localVideo: ElementRef<HTMLVideoElement>;
 
-	constructor(ComponentFactoryResolver: ComponentFactoryResolver,
-		@Inject(DOCUMENT) private document: any) {
+	constructor(
+		private componentFactoryResolver: ComponentFactoryResolver,
+		@Inject(DOCUMENT) private document: any
+	) {
 
 		// Angular 8 is work, but 9.0 can't
-		console.log(ComponentFactoryResolver);
-		ComponentFactoryResolver['_factories'].forEach((element) => {
+		console.log(componentFactoryResolver);
+		
+		componentFactoryResolver['_factories'].forEach((element) => {
 			console.log(element);
 		});
-		this.resolver = Array.from(ComponentFactoryResolver['_factories'].values());
+		this.resolver = Array.from(componentFactoryResolver['_factories'].values());
 
 		// 初始化建立SignalR連線   
-		this.connection.start().catch(err => console.error(err));
+		// this.connection.start().catch(err => console.error(err));
 	}
 
 	ngOnInit() {
+		console.log(this.componentFactoryResolver);
+
 		//SignalR開始連線接收刷新數據
-		this.connection.on("AnswerSDP", (receiveSdp,b) => {
-			console.log(receiveSdp,b);
-		});
+		// this.connection.on("AnswerSDP", (receiveSdp,b) => {
+		// 	console.log(receiveSdp,b);
+		// });
 
 		this.startStream();
 
@@ -82,7 +88,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy(){
 		//關閉SignalR連線
-		this.connection.off;
+		// this.connection.off;
 	}
 
 	initDrawPanel() {
